@@ -1,12 +1,10 @@
 package pedigree;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 
-public class Heap {
+import java.util.Comparator;
+
+
+public class Heap<T>{
 	
     //The heap
     private Object[] H;
@@ -18,9 +16,16 @@ public class Heap {
     public Heap(int n, Comparator c){
         H = new Object[n];
         this.n = 1;
+        this.c = c;
+    }
+    
+    public Heap(Comparator c){
+        H = new Object[8];
+        this.n = 1;
+        this.c = c;
     }
 
-    private void swim(Object v, int i){
+    private void swim(T v, int i){
 
         //The parent's index
         //Notice: automatic floor with Integer
@@ -43,7 +48,7 @@ public class Heap {
         H[i] = v;
     }
 
-    private void sink(Object v, int i){
+    private void sink(T v, int i){
 
         //The smallest child index
         int cIndex = minChild(i);
@@ -78,7 +83,7 @@ public class Heap {
         return minChild;
     }
 
-    public void insert(Comparable x) {
+    public void insert(T x) {
     	if(size() == H.length) resize();
     	H[size()] = x;
         swim(x, size());
@@ -100,7 +105,7 @@ public class Heap {
         H = copy;
     }
 
-	public Object deleteMin() {
+	public T deleteMin() {
 
         if(size() == 0) return null;
 
@@ -113,7 +118,7 @@ public class Heap {
             //Decrement the size
             n--;
 
-            return min;
+            return (T) min;
         }
 
         //Keep the a backup of the root (minimal element)
@@ -121,13 +126,13 @@ public class Heap {
 
         //Sink (with the removed last element)
         Object v = H[size()-1];
-        sink(v, 1);
+        sink((T)v, 1);
         H[size()-1] = null;
         
         //Decrement the size
         n--;
 
-        return min;
+        return (T)min;
     }
 
     public int size() {
@@ -163,7 +168,8 @@ public class Heap {
     }
     
     public static void main(String[] args) {
-    	Heap h = new Heap(2, );
+    	BirthComparator bc = new BirthComparator();
+    	Heap h = new Heap(2, bc);
     	h.insert(1);
     	h.insert(2);
     	h.insert(3);
