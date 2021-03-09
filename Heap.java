@@ -138,6 +138,10 @@ public class Heap<T>{
     public int size() {
         return n;
     }
+    
+    public boolean isEmpty() {
+    	return size() == 0;
+    }
 
     public Object peek() {
         return H[1];
