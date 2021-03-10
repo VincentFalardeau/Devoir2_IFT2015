@@ -140,11 +140,15 @@ public class Heap<T>{
     }
     
     public boolean isEmpty() {
-    	return size() == 0;
+    	return size() == 1;
     }
 
-    public Object peek() {
-        return H[1];
+    public T peek() {
+        return (T)H[1];
+    }
+    
+    public T get(int i) {
+    	return (T)H[i];
     }
 
     @Override
@@ -171,26 +175,6 @@ public class Heap<T>{
 
     }
     
-    public static void main(String[] args) {
-    	BirthComparator bc = new BirthComparator();
-    	Heap h = new Heap(2, bc);
-    	h.insert(1);
-    	h.insert(2);
-    	h.insert(3);
-    	h.insert(4);
-    	System.out.println(h);
-    	System.out.println();
-    	System.out.println(h.peek());
-    	System.out.println(h.deleteMin());
-    	System.out.println(h.peek());
-    	System.out.println();
-    	System.out.println(h);
-    	h.insert(10);
-    	h.insert(3);
-    	h.insert(3);
-    	h.insert(6);
-    	System.out.println(h);
-    		
-    }
+    
 
 }

@@ -15,6 +15,8 @@
  */
 package pedigree;
 
+import java.util.Random;
+
 /**
  *
  * @author Mikl&oacute;s Cs&#369;r&ouml;s
@@ -64,6 +66,18 @@ public class Sim implements Comparable<Sim>
         this.sim_ident = NEXT_SIM_IDX++;
     }
     
+    protected Sim(Sim mother, Sim father, double birth)
+    {
+        this.mother = mother;
+        this.father = father;
+        
+        this.birthtime = birth;
+        this.deathtime = Double.POSITIVE_INFINITY;
+    
+        
+        this.sim_ident = NEXT_SIM_IDX++;
+    }
+    
     /**
      * A founding Sim.
      * 
@@ -71,6 +85,11 @@ public class Sim implements Comparable<Sim>
     public Sim(Sex sex)
     {
         this(null, null, 0.0, sex);
+    }
+    
+    public Sim()
+    {
+        this(null, null, 0.0);
     }
     
     /**
@@ -162,6 +181,16 @@ public class Sim implements Comparable<Sim>
     private static String getIdentString(Sim sim)
     {
         return sim==null?"":"sim."+sim.sim_ident+"/"+sim.sex;
+    }
+    
+    public void randomizeSex(Random rand) {
+    	if(rand.nextInt(1) == 0) {
+			this.sex = Sim.Sex.F;
+				
+		}
+		else {
+			this.sex = Sim.Sex.M;
+		}
     }
     
     @Override
