@@ -34,29 +34,29 @@ public class Pedigree {
 
 			Event E = eventQ.deleteMin();
 			
-			System.out.println(eventQ.size());
+			//System.out.println(eventQ.size());
 
 			if (E.getTime() > maxTime) break;
 
 			if (E.getSubject().getDeathTime() > E.getTime()){
+				
 
 				if(E.getType() == Event.Type.Birth) {
 
 					handleBirthEvent(E);
 
 				}
-				else if(E.getType() == Event.Type.Death) {
-					
-					handleDeathEvent(E);
-				}
 				else if(E.getType() == Event.Type.Reproduction) {
 					
 					handleReproductionEvent(E);
-
-				
-
 				}
 
+			}
+			else {
+				if(E.getType() == Event.Type.Death) {
+						
+					 handleDeathEvent(E);
+				}
 			}
 		}
 		
@@ -84,8 +84,8 @@ public class Pedigree {
 		Sim s = E.getSubject();
 
 		//Death
-		s.setDeathTime(ageModel.randomAge(rand));
-		eventQ.insert(new Event(Event.Type.Death, s, E.getTime() + s.getDeathTime()));
+		s.setDeathTime(E.getTime() + ageModel.randomAge(rand));
+		eventQ.insert(new Event(Event.Type.Death, s, s.getDeathTime()));
 		
 
 
@@ -100,8 +100,10 @@ public class Pedigree {
 	}
 	
 	private void handleDeathEvent(Event E) {
+	
+		//System.out.println(population.peek().getDeathTime() + ", " + E.getTime() );
 		
-		if(population.peek().getDeathTime() == E.getTime()) {
+		if(population.peek().getDeathTime() <= E.getTime()) {
 			
 			population.deleteMin();
 
