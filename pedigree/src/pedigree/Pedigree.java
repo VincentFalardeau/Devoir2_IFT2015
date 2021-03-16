@@ -260,7 +260,7 @@ public class Pedigree {
 	private Sim findMate(Event E, double acceptanceRate) {
 		
 		int i = 0;
-		final int LIMIT = 10000000;//To make sure there is a mate (that the while will stop)
+		final int LIMIT = population.size() * 100;//To make sure there is a mate (that the while will stop)
 		
 		Sim mate;
 
