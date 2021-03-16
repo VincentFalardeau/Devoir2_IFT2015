@@ -5,8 +5,8 @@ import java.util.Random;
 
 public class Pedigree {
 	
-	private Heap<Sim> population;
-	private Heap<Event> eventQ;
+	private PQ<Sim> population;
+	private PQ<Event> eventQ;
 	private Random rand;
 	private AgeModel ageModel;
 	private double rate;
@@ -15,10 +15,10 @@ public class Pedigree {
 	public void simulate(int n, int maxTime) {
 		
 		//Setting founding population
-		population = new Heap(n, new DeathComparator());
+		population = new PQ(n, new DeathComparator());
 
 		//The event queue
-		eventQ = new Heap(new EventComparator());
+		eventQ = new PQ(new EventComparator());
 		
 		rand = new Random();
 		ageModel = new AgeModel();

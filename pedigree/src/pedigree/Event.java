@@ -54,7 +54,7 @@ public class Event {
 		Event e = new Event(Event.Type.Birth, new Sim(null), 2020.0);
 		
 		EventComparator ec = new EventComparator();
-		Heap h = new Heap(ec);
+		PQ h = new PQ(ec);
 		
 		
 		
