@@ -98,7 +98,7 @@ public class PQ<T>{
     	setComparator(c);
     	
         for(int i = n/2; i >= 0; i--){
-            sink((T)H[i], n);
+            sink((T)H[i], i);
         }
     }
     
@@ -163,6 +163,10 @@ public class PQ<T>{
     
     public T get(int i) {
     	return (T)H[i];
+    }
+
+    public Object[] toArray() {
+        return H;
     }
 
     @Override

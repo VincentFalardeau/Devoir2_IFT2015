@@ -1,18 +1,27 @@
 package pedigree;
 
+import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
 public class Pedigree {
 	
 	private PQ<Sim> population;
+	private PQ<Sim> malePopulation;
+	private PQ<Sim> femalePopulation;
+	HashMap<Sim,Double> maleAncestorMap;
+	HashMap<Sim,Double> femaleAncestorMap;
 	private PQ<Event> eventQ;
+
 	private Random rand;
 	private AgeModel ageModel;
+
 	private double rate;
 	private double fidelity;
 
+
 	public void simulate(int n, int maxTime) {
+
 		
 		//Setting founding population
 		population = new PQ(n, new DeathComparator());
@@ -23,20 +32,28 @@ public class Pedigree {
 		rand = new Random();
 		ageModel = new AgeModel();
 		
-		//TODO: check this
+		//Our reproduction rate and our fidelity factor
 		rate = 2 / ageModel.expectedParenthoodSpan(Sim.MIN_MATING_AGE_F, Sim.MAX_MATING_AGE_F);
 		fidelity = 0.9;
 
 		initPopulation(n);
 
+		//Variable used to sample every 100 years
+		int sample = 0;
+
 		//Events
 		while (!eventQ.isEmpty()) {
 
 			Event E = eventQ.deleteMin();
-			
-			//System.out.println(eventQ.size());
+
+			if(E.getTime() > sample) {
+				System.out.println(E.getTime() + "," + population.size());
+				sample += 100;
+			}
 
 			if (E.getTime() > maxTime) break;
+
+
 
 			if (E.getSubject().getDeathTime() > E.getTime()){
 				
@@ -53,21 +70,118 @@ public class Pedigree {
 
 			}
 			else {
+
 				if(E.getType() == Event.Type.Death) {
 						
 					 handleDeathEvent(E);
 				}
 			}
 		}
-		
-		int a = 0;
+
+		//We're not making a copy, but might want to change that in the future
+
+		//population.heapify(new BirthComparator());
 
 
-		//TODO for B part
-		//copy population
-		//Heapify according to BirthComparator
-		//Note: parents are saved in attributes of a Sim
+		ancestorMap(population);
+
 	}
+
+	private void ancestorMap(PQ<Sim> population) {
+
+		//Create new priority queues for our male and female population of initiated to roughly half of population size
+		malePopulation = new PQ(population.size()/2,new BirthComparator());
+		femalePopulation = new PQ(population.size()/2,new BirthComparator());
+
+		//HashMaps containing males / females ancestors
+		maleAncestorMap = new HashMap<>();
+		femaleAncestorMap = new HashMap<>();
+
+		System.out.println("population size" + population.size());
+
+
+
+		//Iterate through our population to seperate between males and females
+		while (!population.isEmpty()) {
+
+			Sim s = population.deleteMin();
+
+			if (s.getSex() == Sim.Sex.M) {
+				malePopulation.insert(s);
+			}
+			else {
+				femalePopulation.insert(s);
+			}
+		}
+
+
+		int numberOfMen = malePopulation.size();
+		int numberOfWomen = femalePopulation.size();
+
+		System.out.println("Men ancestors");
+
+		//Iterating through all our men
+		while (numberOfMen > 0) {
+			Sim s = malePopulation.deleteMin();
+			Sim father = s.getFather();
+
+			//If the father is not a founder and isn't already in our map, we add him to our population and our ancestorMap
+			if(father != null && !maleAncestorMap.containsKey(father)) {
+				maleAncestorMap.put(father, father.getBirthTime());
+				malePopulation.insert(father);
+			}
+			//Else we've found a lineage and we decrease the number of men we need to go through (because one line is closed off)
+			else {
+				System.out.println(s.getBirthTime() + "," + maleAncestorMap.size());
+				//Can print here so we don't have to iterate through HashMap
+				numberOfMen--;
+			}
+		}
+
+
+		System.out.println("Women ancestors");
+
+
+		//Same thing as men, but for women and their mothers.
+		while (numberOfWomen > 0) {
+			Sim s = femalePopulation.deleteMin();
+			Sim mother = s.getMother();
+
+			if(mother != null && !femaleAncestorMap.containsKey(mother)) {
+				femaleAncestorMap.put(mother,mother.getBirthTime());
+				femalePopulation.insert(mother);
+			}
+			else {
+				System.out.println(s.getBirthTime() + "," + femaleAncestorMap.size());
+				numberOfWomen--;
+			}
+		}
+
+
+
+
+
+
+
+
+	}
+
+	private int countSex(Sim.Sex s) {
+
+		int count = 0;
+
+		Object[] populationArray = population.toArray();
+
+		for (int i = 0; i < populationArray.length; i++) {
+
+			if(((Sim) populationArray[i]).getSex() == s) {
+				count++;
+			}
+
+		}
+		return count;
+	}
+
 	
 	private void initPopulation(int n) {
 		for(int i = 0; i < n; i++) {
@@ -149,22 +263,24 @@ public class Pedigree {
 		final int LIMIT = 10000000;//To make sure there is a mate (that the while will stop)
 		
 		Sim mate;
-		
-		do {
-			int index = 1+rand.nextInt(population.size()-1);
-			
+
+
+		while (true) {
+
+			int index = rand.nextInt(population.size());
 			mate = population.get(index);
-			
 			i++;
-		} while((!mate.isMatingAge(E.getTime())) 
-				&& (mate.getSex() != Sim.Sex.M) 
-				&& (i < LIMIT) 
-				&& (!mate.isInARelationship(E.getTime()) || rand.nextDouble() > acceptanceRate));
-		
-		if(i == LIMIT) {
-			throw new NoSuchElementException();
+
+			if((mate.isMatingAge(E.getTime())) && (mate.getSex() == Sim.Sex.M) && ((!mate.isInARelationship(E.getTime())) || rand.nextDouble() > acceptanceRate)) {
+				break;
+			}
+			//We don't want to loop to infinity in the really really really rare chance that no suitable males exist in the population, so we set arbitrary
+			//limit and throw exception if it's reached.
+			else if (i > LIMIT) {
+				throw new NoSuchElementException();
+			}
 		}
-		
+
 		//Match the 2 mates
 		mate.setMate(E.getSubject());
 		E.getSubject().setMate(mate);

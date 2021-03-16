@@ -184,7 +184,7 @@ public class Sim implements Comparable<Sim>
     }
     
     public void randomizeSex(Random rand) {
-    	if(rand.nextInt(1) == 0) {
+    	if(rand.nextInt(2) == 0) {
 			this.sex = Sim.Sex.F;
 				
 		}
@@ -198,5 +198,10 @@ public class Sim implements Comparable<Sim>
     {
         return getIdentString(this)+" ["+birthtime+".."+deathtime+", mate "+getIdentString(mate)+"\tmom "+getIdentString(getMother())+"\tdad "+getIdentString(getFather())
         +"]";
+    }
+
+
+    public boolean equals(Sim o) {
+        return this.sim_ident == o.sim_ident;
     }
 }
