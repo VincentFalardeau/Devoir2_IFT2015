@@ -94,7 +94,7 @@ public class Pedigree {
 	}
 
 	/**
-	 * Prints the coalescence points of our population
+	 * Prints the coalescence points (lineage) of our population
 	 * @param population, our population
 	 * */
 	private void coalescencePoints(PQ<Sim> population) {
@@ -122,13 +122,13 @@ public class Pedigree {
 			}
 		}
 
-		int numberOfMen = malePopulation.size();
-		int numberOfWomen = femalePopulation.size();
+		int nbOfMenCoalescence = malePopulation.size();
+		int nbOfWomenCoalescence = femalePopulation.size();
 
 		System.out.println("Men ancestors");
 
 		//Iterating through all our men
-		while (numberOfMen > 0) {
+		while (nbOfMenCoalescence > 0) {
 			Sim s = malePopulation.deleteMin();
 			Sim father = s.getFather();
 
@@ -139,15 +139,15 @@ public class Pedigree {
 			}
 			//Else we've found a lineage and we decrease the number of men we need to go through (because one line is closed off)
 			else {
-				System.out.println(s.getBirthTime() + "," + numberOfMen);
-				numberOfMen--;
+				System.out.println(s.getBirthTime()/1000 + "," + nbOfMenCoalescence);
+				nbOfMenCoalescence--;
 			}
 		}
 
 		System.out.println("Women ancestors");
 
 		//Same thing as men, but for women and their mothers.
-		while (numberOfWomen > 0) {
+		while (nbOfWomenCoalescence > 0) {
 			Sim s = femalePopulation.deleteMin();
 			Sim mother = s.getMother();
 
@@ -156,8 +156,8 @@ public class Pedigree {
 				femalePopulation.insert(mother);
 			}
 			else {
-				System.out.println(s.getBirthTime() + "," + numberOfWomen);
-				numberOfWomen--;
+				System.out.println(s.getBirthTime()/1000 + "," + nbOfWomenCoalescence);
+				nbOfWomenCoalescence--;
 			}
 		}
 	}
@@ -190,7 +190,6 @@ public class Pedigree {
 		//Reproduction
 		if(s.getSex() == Sim.Sex.F) {
 
-			//TODO: check this
 			eventQ.insert(new Event(Event.Type.Reproduction, s, E.getTime() + ageModel.randomWaitingTime(rand, rate)));
 		}
 		//Add the Sim to the population
@@ -209,7 +208,6 @@ public class Pedigree {
 		}
 		else {
 
-			//TODO: Handle this
 			System.out.println("Problème heap de population");
 		}
 	}
