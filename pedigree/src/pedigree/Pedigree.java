@@ -170,6 +170,7 @@ public class Pedigree {
 	 * @param n, the size of the population
 	 * */
 	private void initPopulation(int n) {
+
 		for(int i = 0; i < n; i++) {
 
 			Sim s = new Sim(null);
