@@ -16,7 +16,11 @@ public class Pedigree {
 	 * */
 	public static void main(String[] args) {
 
-		//Args
+		if(args.length != 2) {
+			System.out.println("This program needs 2 arguments to run : An initial number for our population and a time duration");
+		}
+
+		//Arguments
 		int n = Integer.parseInt(args[0]);
 		int maxTime = Integer.parseInt(args[1]);
 
