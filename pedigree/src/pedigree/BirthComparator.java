@@ -2,7 +2,10 @@ package pedigree;
 
 import java.util.Comparator;
 
-//Comparator for age of sims (instead of death)
+/**
+ * Compares 2 Sims according to their age (youngest first)
+ *
+ * */
 public class BirthComparator implements Comparator<Sim> {
 
   public int compare(Sim a, Sim b) {
