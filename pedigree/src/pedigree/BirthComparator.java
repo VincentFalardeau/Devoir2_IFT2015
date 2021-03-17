@@ -3,6 +3,11 @@ package pedigree;
 import java.util.Comparator;
 
 /**
+ * @author Vincent Falardeau
+ * @author Karim Boumghar
+ * */
+
+/**
  * Compares 2 Sims according to their age (youngest first)
  *
  * */

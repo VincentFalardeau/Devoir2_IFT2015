@@ -2,6 +2,10 @@ package pedigree;
 
 import java.util.Comparator;
 
+/**
+ * @author Vincent Falardeau
+ * @author Karim Boumghar
+ * */
 
 /**
  * Compares 2 Events according to their time

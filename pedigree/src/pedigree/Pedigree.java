@@ -4,6 +4,11 @@ import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
+/**
+ * @author Vincent Falardeau
+ * @author Karim Boumghar
+ * */
+
 public class Pedigree {
 
 	/**
