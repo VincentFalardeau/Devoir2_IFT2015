@@ -55,7 +55,7 @@ public class Pedigree {
 
 		initPopulation(n);
 
-		//Variable used to sample every 100 years
+		//Variable used to sample
 		int sample = 0;
 
 		//Events
@@ -63,6 +63,7 @@ public class Pedigree {
 
 			Event E = eventQ.deleteMin();
 
+			//Print of population size every 100 years (can be changed)
 			if(E.getTime() > sample) {
 				System.out.println(E.getTime() + "," + population.size());
 				sample += 100;
@@ -98,7 +99,7 @@ public class Pedigree {
 
 	/**
 	 * Prints the coalescence points (lineage) of our population
-	 * @param population, our population
+	 * @param population, population of sims
 	 * */
 	private void coalescencePoints(PQ<Sim> population) {
 
@@ -125,13 +126,13 @@ public class Pedigree {
 			}
 		}
 
-		int nbOfMenCoalescence = malePopulation.size();
-		int nbOfWomenCoalescence = femalePopulation.size();
+		int nbOfMenLineage = malePopulation.size();
+		int nbOfWomenLineage = femalePopulation.size();
 
 		System.out.println("Men ancestors");
 
-		//Iterating through all our men
-		while (nbOfMenCoalescence > 0) {
+		//Iterating through all our lineages
+		while (nbOfMenLineage > 0) {
 			Sim s = malePopulation.deleteMin();
 			Sim father = s.getFather();
 
@@ -142,15 +143,15 @@ public class Pedigree {
 			}
 			//Else we've found a lineage and we decrease the number of men we need to go through (because one line is closed off)
 			else {
-				System.out.println(s.getBirthTime()/1000 + "," + nbOfMenCoalescence);
-				nbOfMenCoalescence--;
+				System.out.println(s.getBirthTime()/1000 + "," + nbOfMenLineage);
+				nbOfMenLineage--;
 			}
 		}
 
 		System.out.println("Women ancestors");
 
-		//Same thing as men, but for women and their mothers.
-		while (nbOfWomenCoalescence > 0) {
+		//Same thing as men
+		while (nbOfWomenLineage > 0) {
 			Sim s = femalePopulation.deleteMin();
 			Sim mother = s.getMother();
 
@@ -159,8 +160,8 @@ public class Pedigree {
 				femalePopulation.insert(mother);
 			}
 			else {
-				System.out.println(s.getBirthTime()/1000 + "," + nbOfWomenCoalescence);
-				nbOfWomenCoalescence--;
+				System.out.println(s.getBirthTime()/1000 + "," + nbOfWomenLineage);
+				nbOfWomenLineage--;
 			}
 		}
 	}
