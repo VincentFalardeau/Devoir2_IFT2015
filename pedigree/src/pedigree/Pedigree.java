@@ -5,7 +5,7 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 
 public class Pedigree {
-	
+
 	private PQ<Sim> population;
 	private PQ<Sim> malePopulation;
 	private PQ<Sim> femalePopulation;
@@ -22,16 +22,16 @@ public class Pedigree {
 
 	public void simulate(int n, int maxTime) {
 
-		
+
 		//Setting founding population
 		population = new PQ(n, new DeathComparator());
 
 		//The event queue
 		eventQ = new PQ(new EventComparator());
-		
+
 		rand = new Random();
 		ageModel = new AgeModel();
-		
+
 		//Our reproduction rate and our fidelity factor
 		rate = 2 / ageModel.expectedParenthoodSpan(Sim.MIN_MATING_AGE_F, Sim.MAX_MATING_AGE_F);
 		fidelity = 0.9;
@@ -56,15 +56,14 @@ public class Pedigree {
 
 
 			if (E.getSubject().getDeathTime() > E.getTime()){
-				
+
 
 				if(E.getType() == Event.Type.Birth) {
 
 					handleBirthEvent(E);
-
 				}
 				else if(E.getType() == Event.Type.Reproduction) {
-					
+
 					handleReproductionEvent(E);
 				}
 
@@ -72,19 +71,13 @@ public class Pedigree {
 			else {
 
 				if(E.getType() == Event.Type.Death) {
-						
-					 handleDeathEvent(E);
+
+					handleDeathEvent(E);
 				}
 			}
 		}
-
 		//We're not making a copy, but might want to change that in the future
-
-		//population.heapify(new BirthComparator());
-
-
 		ancestorMap(population);
-
 	}
 
 	private void ancestorMap(PQ<Sim> population) {
@@ -97,23 +90,20 @@ public class Pedigree {
 		maleAncestorMap = new HashMap<>();
 		femaleAncestorMap = new HashMap<>();
 
-		System.out.println("population size" + population.size());
-
-
-
 		//Iterate through our population to seperate between males and females
 		while (!population.isEmpty()) {
 
 			Sim s = population.deleteMin();
 
 			if (s.getSex() == Sim.Sex.M) {
+
 				malePopulation.insert(s);
 			}
 			else {
+
 				femalePopulation.insert(s);
 			}
 		}
-
 
 		int numberOfMen = malePopulation.size();
 		int numberOfWomen = femalePopulation.size();
@@ -132,15 +122,13 @@ public class Pedigree {
 			}
 			//Else we've found a lineage and we decrease the number of men we need to go through (because one line is closed off)
 			else {
-				System.out.println(s.getBirthTime() + "," + maleAncestorMap.size());
+
 				//Can print here so we don't have to iterate through HashMap
 				numberOfMen--;
 			}
 		}
 
-
 		System.out.println("Women ancestors");
-
 
 		//Same thing as men, but for women and their mothers.
 		while (numberOfWomen > 0) {
@@ -152,118 +140,99 @@ public class Pedigree {
 				femalePopulation.insert(mother);
 			}
 			else {
-				System.out.println(s.getBirthTime() + "," + femaleAncestorMap.size());
+				//System.out.println(s.getBirthTime() + "," + femaleAncestorMap.size());
 				numberOfWomen--;
 			}
 		}
-
-
-
-
-
-
-
-
 	}
 
 	private int countSex(Sim.Sex s) {
 
 		int count = 0;
-
 		Object[] populationArray = population.toArray();
 
 		for (int i = 0; i < populationArray.length; i++) {
 
 			if(((Sim) populationArray[i]).getSex() == s) {
+
 				count++;
 			}
-
 		}
 		return count;
 	}
 
-	
+
 	private void initPopulation(int n) {
 		for(int i = 0; i < n; i++) {
+
 			Sim s = new Sim(null);
 			s.randomizeSex(rand);
-					
 			eventQ.insert(new Event(Event.Type.Birth, s, 0.0));
-
 		}
 	}
 
-
 	private void handleBirthEvent(Event E) {
+
 		Sim s = E.getSubject();
 
 		//Death
 		s.setDeathTime(E.getTime() + ageModel.randomAge(rand));
 		eventQ.insert(new Event(Event.Type.Death, s, s.getDeathTime()));
-		
-
 
 		//Reproduction
 		if(s.getSex() == Sim.Sex.F) {
+
 			//TODO: check this
 			eventQ.insert(new Event(Event.Type.Reproduction, s, E.getTime() + ageModel.randomWaitingTime(rand, rate)));
 		}
-
 		//Add the Sim to the population
 		population.insert(E.getSubject());
 	}
-	
-	private void handleDeathEvent(Event E) {
-	
-		//System.out.println(population.peek().getDeathTime() + ", " + E.getTime() );
-		
-		if(population.peek().getDeathTime() <= E.getTime()) {
-			
-			population.deleteMin();
 
+	private void handleDeathEvent(Event E) {
+
+		//System.out.println(population.peek().getDeathTime() + ", " + E.getTime() );
+		if(population.peek().getDeathTime() <= E.getTime()) {
+
+			population.deleteMin();
 		}
 		else {
+
 			//TODO: Handle this
 			System.out.println("Problème heap de population");
 		}
 	}
-	
+
 	private void handleReproductionEvent(Event E) {
-		
+
 		if(E.getSubject().isMatingAge(E.getTime())) {
-			
+
 			if(E.getSubject().isInARelationship(E.getTime())) {
-				
+
 				Sim father = E.getSubject().getMate();
-				
 				if(rand.nextDouble() > fidelity) {
+
 					//Change mate
 					father = findMate(E, 1);
-					
 				}
-				
 				mate(E.getSubject(), father, E);
-				
 			}
 			else {
+
 				Sim father = findMate(E, 1-fidelity);
-				
 				mate(E.getSubject(), father, E);
 			}
-			
 		}
-		
+
 		eventQ.insert(new Event(Event.Type.Reproduction, E.getSubject(), E.getTime() + ageModel.randomWaitingTime(rand, rate)));
-		
 	}
-	
+
 	private Sim findMate(Event E, double acceptanceRate) {
-		
+
 		int i = 0;
 		final int LIMIT = population.size() * 100;//To make sure there is a mate (that the while will stop)
-		
-		Sim mate;
 
+		Sim mate;
 
 		while (true) {
 
@@ -286,30 +255,24 @@ public class Pedigree {
 		E.getSubject().setMate(mate);
 
 		return mate;
-		
-	}
-	
-	private void mate(Sim mother, Sim father, Event E) {
-		
-		Sim child = new Sim(mother, father, E.getTime());
-		child.randomizeSex(rand);
-		
-		eventQ.insert(new Event(Event.Type.Birth, child, E.getTime()));
 	}
 
-	
-	
+	private void mate(Sim mother, Sim father, Event E) {
+
+		Sim child = new Sim(mother, father, E.getTime());
+		child.randomizeSex(rand);
+
+		eventQ.insert(new Event(Event.Type.Birth, child, E.getTime()));
+	}
 
 	public static void main(String[] args) {
 
 		//Args
 		int n = Integer.parseInt(args[0]);
 		int maxTime = Integer.parseInt(args[1]);
-		
+
 		Pedigree p = new Pedigree();
 
 		p.simulate(n, maxTime);
-		
 	}
-
 }
