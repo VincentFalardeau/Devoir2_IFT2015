@@ -18,6 +18,7 @@ public class Pedigree {
 
 		if(args.length != 2) {
 			System.out.println("This program needs 2 arguments to run : An initial number for our population and a time duration");
+			System.exit(-1);
 		}
 
 		//Arguments
