@@ -162,22 +162,6 @@ public class Pedigree {
 		}
 	}
 
-	private int countSex(Sim.Sex s) {
-
-		int count = 0;
-		Object[] populationArray = population.toArray();
-
-		for (int i = 0; i < populationArray.length; i++) {
-
-			if(((Sim) populationArray[i]).getSex() == s) {
-
-				count++;
-			}
-		}
-		return count;
-	}
-
-
 	/**
 	 * Initializes the population
 	 * @param n, the size of the population
@@ -309,20 +293,4 @@ public class Pedigree {
 
 		eventQ.insert(new Event(Event.Type.Birth, child, E.getTime()));
 	}
-
-	//Unused for now
-//	private int countSex(Sim.Sex s) {
-//
-//		int count = 0;
-//		Object[] populationArray = population.toArray();
-//
-//		for (int i = 0; i < populationArray.length; i++) {
-//
-//			if(((Sim) populationArray[i]).getSex() == s) {
-//
-//				count++;
-//			}
-//		}
-//		return count;
-//	}
 }
