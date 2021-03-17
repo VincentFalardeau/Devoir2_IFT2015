@@ -156,7 +156,7 @@ public class Pedigree {
 				femalePopulation.insert(mother);
 			}
 			else {
-				//System.out.println(s.getBirthTime() + "," + femaleAncestorMap.size());
+				System.out.println(s.getBirthTime() + "," + numberOfWomen);
 				numberOfWomen--;
 			}
 		}
