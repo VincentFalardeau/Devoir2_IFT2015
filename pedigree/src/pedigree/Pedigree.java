@@ -5,12 +5,26 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 
 public class Pedigree {
+	
+	/**
+	 * The main program of the project
+	 * */
+	public static void main(String[] args) {
 
+		//Args
+		int n = Integer.parseInt(args[0]);
+		int maxTime = Integer.parseInt(args[1]);
+
+		//Simulate
+		Pedigree p = new Pedigree();
+		p.simulate(n, maxTime);
+	}
+	
 	private PQ<Sim> population;
 	private PQ<Sim> malePopulation;
 	private PQ<Sim> femalePopulation;
-	HashMap<Sim,Double> maleAncestorMap;
-	HashMap<Sim,Double> femaleAncestorMap;
+	private HashMap<Sim,Double> maleAncestorMap;
+	private HashMap<Sim,Double> femaleAncestorMap;
 	private PQ<Event> eventQ;
 
 	private Random rand;
@@ -19,9 +33,12 @@ public class Pedigree {
 	private double rate;
 	private double fidelity;
 
-
-	public void simulate(int n, int maxTime) {
-
+	/**
+	 * Simulation.
+	 * @param n, the size of the initial population
+	 * @param maxTime, the duration of the simulation
+	 * */
+	public void simulate(int n, int maxTime) {		
 
 		//Setting founding population
 		population = new PQ(n, new DeathComparator());
@@ -47,16 +64,13 @@ public class Pedigree {
 			Event E = eventQ.deleteMin();
 
 			if(E.getTime() > sample) {
-				System.out.println(E.getTime() + "," + population.size());
+				//System.out.println(E.getTime() + "," + population.size());
 				sample += 100;
 			}
 
 			if (E.getTime() > maxTime) break;
 
-
-
 			if (E.getSubject().getDeathTime() > E.getTime()){
-
 
 				if(E.getType() == Event.Type.Birth) {
 
@@ -66,7 +80,6 @@ public class Pedigree {
 
 					handleReproductionEvent(E);
 				}
-
 			}
 			else {
 
@@ -77,14 +90,18 @@ public class Pedigree {
 			}
 		}
 		//We're not making a copy, but might want to change that in the future
-		ancestorMap(population);
+		coalescencePoints(population);
 	}
 
-	private void ancestorMap(PQ<Sim> population) {
+	/**
+	 * Prints the coalescence points of our population
+	 * @param population, our population
+	 * */
+	private void coalescencePoints(PQ<Sim> population) {
 
 		//Create new priority queues for our male and female population of initiated to roughly half of population size
-		malePopulation = new PQ(population.size()/2,new BirthComparator());
-		femalePopulation = new PQ(population.size()/2,new BirthComparator());
+		malePopulation = new PQ(population.size()/2,new InvertedAgeComparator());
+		femalePopulation = new PQ(population.size()/2,new InvertedAgeComparator());
 
 		//HashMaps containing males / females ancestors
 		maleAncestorMap = new HashMap<>();
@@ -105,63 +122,67 @@ public class Pedigree {
 			}
 		}
 
-		int numberOfMen = malePopulation.size();
-		int numberOfWomen = femalePopulation.size();
+		//int numberOfMen = malePopulation.size();
+		//int numberOfWomen = femalePopulation.size();
 
 		System.out.println("Men ancestors");
 
 		//Iterating through all our men
-		while (numberOfMen > 0) {
+		while (!malePopulation.isEmpty()) {
 			Sim s = malePopulation.deleteMin();
 			Sim father = s.getFather();
+			
 
-			//If the father is not a founder and isn't already in our map, we add him to our population and our ancestorMap
+			//If the father is not a founder and isn't already in our map, we add him to our population 
+			//and our ancestorMap
 			if(father != null && !maleAncestorMap.containsKey(father)) {
 				maleAncestorMap.put(father, father.getBirthTime());
 				malePopulation.insert(father);
+				
 			}
-			//Else we've found a lineage and we decrease the number of men we need to go through (because one line is closed off)
-			else {
+			//Else we've found a lineage (coalescence point)
+			else if(father != null){
 
 				//Can print here so we don't have to iterate through HashMap
-				numberOfMen--;
+				System.out.println((int)s.getBirthTime() + ";" + maleAncestorMap.size());
+				
 			}
 		}
+		
+		
+		//TODO: Same logic for female population
+//		while(!malePopulation.isEmpty()) {
+//			System.out.println(malePopulation.deleteMin().getBirthTime());
+//		}
 
-		System.out.println("Women ancestors");
-
-		//Same thing as men, but for women and their mothers.
-		while (numberOfWomen > 0) {
-			Sim s = femalePopulation.deleteMin();
-			Sim mother = s.getMother();
-
-			if(mother != null && !femaleAncestorMap.containsKey(mother)) {
-				femaleAncestorMap.put(mother,mother.getBirthTime());
-				femalePopulation.insert(mother);
-			}
-			else {
-				//System.out.println(s.getBirthTime() + "," + femaleAncestorMap.size());
-				numberOfWomen--;
-			}
-		}
+//		System.out.println("Women ancestors");
+//
+//		//Same thing as men, but for women and their mothers.
+//		while (numberOfWomen > 0) {
+//			Sim s = femalePopulation.deleteMin();
+//			if(s == null) break;
+//			Sim mother = s.getMother();
+//
+//			if(mother != null && !femaleAncestorMap.containsKey(mother)) {
+//				femaleAncestorMap.put(mother,mother.getBirthTime());
+//				femalePopulation.insert(mother);
+//			}
+//			else if(mother != null){
+//				
+//				///Can print here so we don't have to iterate through HashMap
+//				System.out.println(s.getBirthTime() + "," + femaleAncestorMap.size());
+//				
+//				//System.out.println(s.getBirthTime() + "," + femaleAncestorMap.size());
+//				numberOfWomen--;
+//			}
+//		}
 	}
 
-	private int countSex(Sim.Sex s) {
-
-		int count = 0;
-		Object[] populationArray = population.toArray();
-
-		for (int i = 0; i < populationArray.length; i++) {
-
-			if(((Sim) populationArray[i]).getSex() == s) {
-
-				count++;
-			}
-		}
-		return count;
-	}
-
-
+	
+	/**
+	 * Initializes the population
+	 * @param n, the size of the population
+	 * */
 	private void initPopulation(int n) {
 		for(int i = 0; i < n; i++) {
 
@@ -171,6 +192,10 @@ public class Pedigree {
 		}
 	}
 
+	/**
+	 * Handles a given birth event
+	 * @param E, the event
+	 * */
 	private void handleBirthEvent(Event E) {
 
 		Sim s = E.getSubject();
@@ -189,9 +214,12 @@ public class Pedigree {
 		population.insert(E.getSubject());
 	}
 
+	/**
+	 * Handles a given death event
+	 * @param E, the event
+	 * */
 	private void handleDeathEvent(Event E) {
 
-		//System.out.println(population.peek().getDeathTime() + ", " + E.getTime() );
 		if(population.peek().getDeathTime() <= E.getTime()) {
 
 			population.deleteMin();
@@ -203,6 +231,10 @@ public class Pedigree {
 		}
 	}
 
+	/**
+	 * Handles a given reproduction event
+	 * @param E, the event
+	 * */
 	private void handleReproductionEvent(Event E) {
 
 		if(E.getSubject().isMatingAge(E.getTime())) {
@@ -227,10 +259,18 @@ public class Pedigree {
 		eventQ.insert(new Event(Event.Type.Reproduction, E.getSubject(), E.getTime() + ageModel.randomWaitingTime(rand, rate)));
 	}
 
+	/**
+	 * Finds a mate to the subject associated with the given event
+	 * @param E, the event for which we want to find a mate for the subject
+	 * @param acceptanceRate, a rate that will influence the choosen mate
+	 * @return the choosen mate
+	 * */
 	private Sim findMate(Event E, double acceptanceRate) {
 
 		int i = 0;
-		final int LIMIT = population.size() * 100;//To make sure there is a mate (that the while will stop)
+		
+		//To make sure there is a mate (that the while will stop)
+		final int LIMIT = population.size() * 100;
 
 		Sim mate;
 
@@ -257,6 +297,12 @@ public class Pedigree {
 		return mate;
 	}
 
+	/**
+	 * Mates 2 sims
+	 * @param mother, the mother
+	 * @param father, the father
+	 * @param E, the event when the mating happens
+	 * */
 	private void mate(Sim mother, Sim father, Event E) {
 
 		Sim child = new Sim(mother, father, E.getTime());
@@ -264,15 +310,20 @@ public class Pedigree {
 
 		eventQ.insert(new Event(Event.Type.Birth, child, E.getTime()));
 	}
-
-	public static void main(String[] args) {
-
-		//Args
-		int n = Integer.parseInt(args[0]);
-		int maxTime = Integer.parseInt(args[1]);
-
-		Pedigree p = new Pedigree();
-
-		p.simulate(n, maxTime);
-	}
+	
+	//Unused for now
+//	private int countSex(Sim.Sex s) {
+//
+//		int count = 0;
+//		Object[] populationArray = population.toArray();
+//
+//		for (int i = 0; i < populationArray.length; i++) {
+//
+//			if(((Sim) populationArray[i]).getSex() == s) {
+//
+//				count++;
+//			}
+//		}
+//		return count;
+//	}
 }

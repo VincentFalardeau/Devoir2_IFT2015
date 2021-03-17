@@ -183,6 +183,9 @@ public class Sim implements Comparable<Sim>
         return sim==null?"":"sim."+sim.sim_ident+"/"+sim.sex;
     }
     
+    /**
+     * Assigns a random sex to the current Sim
+     * */
     public void randomizeSex(Random rand) {
     	if(rand.nextInt(2) == 0) {
 			this.sex = Sim.Sex.F;

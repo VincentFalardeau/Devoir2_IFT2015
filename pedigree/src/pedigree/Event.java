@@ -47,18 +47,14 @@ public class Event {
 		return Double.toString(time);
 	}
 	
-	
-	
-	
+	/**
+	 * Testing Event
+	 * */
 	public static void main(String[] args) {
 		Event e = new Event(Event.Type.Birth, new Sim(null), 2020.0);
 		
 		EventComparator ec = new EventComparator();
 		PQ h = new PQ(ec);
-		
-		
-		
-		
 		
 		h.insert(new Event(Event.Type.Birth, new Sim(null), 2023.0));
 		h.insert(new Event(Event.Type.Birth, new Sim(null), 2022.0));
