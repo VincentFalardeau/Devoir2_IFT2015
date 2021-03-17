@@ -70,7 +70,7 @@ public class Pedigree {
 
 			//Print of population size every 100 years (can be changed)
 			if(E.getTime() > sample) {
-				System.out.println(E.getTime() + "," + population.size());
+				System.out.println(E.getTime()/1000 + "," + population.size());
 				sample += 100;
 			}
 
