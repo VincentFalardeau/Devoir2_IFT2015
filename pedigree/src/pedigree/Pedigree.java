@@ -66,7 +66,7 @@ public class Pedigree {
 		initPopulation(n);
 
 		//Variable used to sample
-		int sample = 0;
+		int sample = 1;
 
 		//Events
 		while (!eventQ.isEmpty()) {
