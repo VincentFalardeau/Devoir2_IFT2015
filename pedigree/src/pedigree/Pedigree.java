@@ -81,6 +81,9 @@ public class Pedigree {
 					handleReproductionEvent(E);
 				}
 			}
+
+			//If the event happened after the the subject is supposed to die, we check if that event is
+			//a death event and treat it
 			else {
 
 				if(E.getType() == Event.Type.Death) {
