@@ -5,6 +5,11 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 /**
+ * @author Vincent Falardeau
+ * @author Karim Boumghar
+ * */
+
+/**
  * PiorityQueue implemented with a Binary Heap.  
  * The binary heap is stored as an array of Object.
  * */

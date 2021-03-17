@@ -1,5 +1,10 @@
 package pedigree;
 
+/**
+ * @author Vincent Falardeau
+ * @author Karim Boumghar
+ * */
+
 public class Event {
 	
 	public enum Type {
